@@ -30,45 +30,16 @@ RUN pnpm install --no-frozen-lockfile
 # Build the Remix app (SSR + client)
 RUN NODE_OPTIONS=--max-old-space-size=4096 pnpm run build
 
-# ---- production dependencies stage ----
-FROM build AS prod-deps
-
-# Keep only production deps for runtime
-RUN pnpm prune --prod --ignore-scripts
-
-
 # ---- production stage ----
-FROM prod-deps AS bolt-ai-production
-WORKDIR /app
+FROM build AS bolt-ai-production
 
 ENV NODE_ENV=production
 ENV PORT=5173
 ENV HOST=0.0.0.0
-
-# Non-sensitive build arguments
-ARG VITE_LOG_LEVEL=debug
-ARG DEFAULT_NUM_CTX
-
-# Set non-sensitive environment variables
-ENV WRANGLER_SEND_METRICS=false \
-    VITE_LOG_LEVEL=${VITE_LOG_LEVEL} \
-    DEFAULT_NUM_CTX=${DEFAULT_NUM_CTX} \
-    RUNNING_IN_DOCKER=true
-
-# Install curl for healthchecks
-RUN apt-get update && apt-get install -y --no-install-recommends curl \
-  && rm -rf /var/lib/apt/lists/*
-
-# Copy built files from build stage
-COPY --from=build /app/build /app/build
+ENV RUNNING_IN_DOCKER=true
 
 EXPOSE 5173
 
-# Healthcheck for deployment platforms
-HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=5 \
-  CMD curl -fsS http://localhost:5173/ || exit 1
-
-# Start the app using the actual JS file
 CMD ["node", "node_modules/@remix-run/serve/dist/cli.js", "build/server/index.js"]
 
 
