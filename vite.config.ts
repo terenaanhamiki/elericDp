@@ -12,6 +12,15 @@ dotenv.config();
 
 export default defineConfig((config) => {
   return {
+    server: {
+      host: '0.0.0.0',
+      port: 5173,
+      allowedHosts: [
+        'elericdp-production.up.railway.app',
+        '.railway.app',
+        'localhost',
+      ],
+    },
     optimizeDeps: {
       include: ['react-dom/server', 'scheduler'],
       exclude: ['@remix-run/web-fetch', '@remix-run/node'],
@@ -60,7 +69,7 @@ export default defineConfig((config) => {
     },
     plugins: [
       remixVitePlugin({
-        presets: [vercelPreset()],
+        presets: config.mode === 'production' ? [vercelPreset()] : [],
         future: {
           v3_fetcherPersist: true,
           v3_relativeSplatPath: true,
