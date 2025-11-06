@@ -3,11 +3,12 @@ import { classNames } from '~/utils/classNames';
 
 // Best models from each provider via OpenRouter (except Gemini)
 const BEST_MODELS = [
-  // FREE models for testing
-  { value: 'meta-llama/llama-3.2-3b-instruct:free', label: 'Llama 3.2 3B (FREE)', provider: 'OpenRouter', icon: 'i-ph:lightning' },
-  { value: 'google/gemma-2-9b-it:free', label: 'Gemma 2 9B (FREE)', provider: 'OpenRouter', icon: 'i-ph:google-logo' },
+  // Google Gemini (100% FREE - 1500 requests/day)
+  { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash (FREE)', provider: 'Google', icon: 'i-ph:google-logo' },
+  { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro (FREE)', provider: 'Google', icon: 'i-ph:google-logo' },
+  { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (FREE)', provider: 'Google', icon: 'i-ph:google-logo' },
 
-  // Anthropic (via OpenRouter)
+  // Anthropic (via OpenRouter - requires credits)
   { value: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet', provider: 'OpenRouter', icon: 'i-ph:robot' },
   { value: 'anthropic/claude-3-5-haiku', label: 'Claude 3.5 Haiku', provider: 'OpenRouter', icon: 'i-ph:robot' },
   { value: 'anthropic/claude-3-opus', label: 'Claude 3 Opus', provider: 'OpenRouter', icon: 'i-ph:robot' },
