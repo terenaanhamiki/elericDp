@@ -38,7 +38,7 @@ RUN pnpm prune --prod --ignore-scripts
 
 
 # ---- production stage ----
-FROM prod-deps AS bolt-ai-production
+FROM node:22-bookworm-slim AS bolt-ai-production
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -66,10 +66,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
 COPY --from=build /app/build /app/build
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=prod-deps /app/package.json /app/package.json
-COPY docker-start.sh /app/docker-start.sh
 
-# Make startup script executable
-RUN chmod +x /app/docker-start.sh
+# Copy and set permissions for startup script in one layer
+COPY --chmod=755 docker-start.sh /app/docker-start.sh
 
 EXPOSE 5173
 
@@ -77,8 +76,8 @@ EXPOSE 5173
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=5 \
   CMD curl -fsS http://localhost:5173/ || exit 1
 
-# Start using docker-start.sh script
-CMD ["/app/docker-start.sh"]
+# Start the app directly without shell script
+CMD ["node", "node_modules/.bin/remix-serve", "./build/server/index.js"]
 
 
 # ---- development stage ----
