@@ -38,7 +38,7 @@ RUN pnpm prune --prod --ignore-scripts
 
 
 # ---- production stage ----
-FROM node:22-bookworm-slim AS bolt-ai-production
+FROM prod-deps AS bolt-ai-production
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -55,20 +55,12 @@ ENV WRANGLER_SEND_METRICS=false \
     DEFAULT_NUM_CTX=${DEFAULT_NUM_CTX} \
     RUNNING_IN_DOCKER=true
 
-# Note: API keys should be provided at runtime via docker run -e or docker-compose
-# Example: docker run -e OPENAI_API_KEY=your_key_here ...
-
-# Install curl for healthchecks and copy bindings script
+# Install curl for healthchecks
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
   && rm -rf /var/lib/apt/lists/*
 
-# Copy built files from build stage and production dependencies
+# Copy built files from build stage
 COPY --from=build /app/build /app/build
-COPY --from=prod-deps /app/node_modules /app/node_modules
-COPY --from=prod-deps /app/package.json /app/package.json
-
-# Copy and set permissions for startup script in one layer
-COPY --chmod=755 docker-start.sh /app/docker-start.sh
 
 EXPOSE 5173
 
@@ -77,7 +69,7 @@ HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=5 \
   CMD curl -fsS http://localhost:5173/ || exit 1
 
 # Start the app using the actual JS file
-CMD ["node", "node_modules/@remix-run/serve/dist/cli.js", "./build/server/index.js"]
+CMD ["node", "node_modules/@remix-run/serve/dist/cli.js", "build/server/index.js"]
 
 
 # ---- development stage ----

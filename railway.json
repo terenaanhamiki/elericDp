@@ -7,7 +7,7 @@
     "dockerTarget": "bolt-ai-production"
   },
   "deploy": {
-    "startCommand": "node node_modules/@remix-run/serve/dist/cli.js ./build/server/index.js",
+    "startCommand": "node node_modules/@remix-run/serve/dist/cli.js build/server/index.js",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
