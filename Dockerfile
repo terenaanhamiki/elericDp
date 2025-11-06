@@ -40,6 +40,9 @@ ENV RUNNING_IN_DOCKER=true
 
 EXPOSE 5173
 
+# Ensure production build exists
+RUN ls -la build/server/ || echo "Build folder missing!"
+
 CMD ["node", "node_modules/@remix-run/serve/dist/cli.js", "build/server/index.js"]
 
 
