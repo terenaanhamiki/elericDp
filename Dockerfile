@@ -76,8 +76,8 @@ EXPOSE 5173
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=5 \
   CMD curl -fsS http://localhost:5173/ || exit 1
 
-# Start the app directly without shell script
-CMD ["node", "node_modules/.bin/remix-serve", "./build/server/index.js"]
+# Start the app using the actual JS file
+CMD ["node", "node_modules/@remix-run/serve/dist/cli.js", "./build/server/index.js"]
 
 
 # ---- development stage ----
