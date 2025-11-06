@@ -394,6 +394,12 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
               if (part.type === 'error') {
                 const error: any = part.error;
                 logger.error('Streaming error:', error);
+                logger.error('Error details:', JSON.stringify({
+                  message: error.message,
+                  stack: error.stack,
+                  name: error.name,
+                  cause: error.cause,
+                }));
                 streamRecovery.stop();
 
                 // Enhanced error handling for common streaming issues
@@ -402,7 +408,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
                 } else if (error.message?.includes('token')) {
                   logger.error('Token-related error detected - possible token limit exceeded');
                 } else if (error.message?.includes('process successful response')) {
-                  logger.error('Response parsing error - model may be incompatible with streaming on Vercel');
+                  logger.error('Response parsing error - API returned unexpected format. Check API key credits and model availability.');
                 }
 
                 return;
@@ -429,7 +435,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
         }
 
         if (errorMessage.includes('process successful response') || errorMessage.includes('Failed to process')) {
-          return 'Custom error: Experimental model incompatible with Vercel. Please use stable models like gemini-2.5-pro or gemini-2.5-flash instead of -exp models.';
+          return 'Custom error: Streaming response error. The model may have returned an unexpected format. Try: 1) Refresh and try again, 2) Use a different model, or 3) Check your API key has sufficient credits.';
         }
 
         if (

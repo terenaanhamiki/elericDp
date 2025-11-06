@@ -3,6 +3,9 @@ import { classNames } from '~/utils/classNames';
 
 // Best models from each provider via OpenRouter (except Gemini)
 const BEST_MODELS = [
+  // FREE models for testing
+  { value: 'meta-llama/llama-3.2-3b-instruct:free', label: 'Llama 3.2 3B (FREE)', provider: 'OpenRouter', icon: 'i-ph:lightning' },
+  { value: 'google/gemma-2-9b-it:free', label: 'Gemma 2 9B (FREE)', provider: 'OpenRouter', icon: 'i-ph:google-logo' },
 
   // Anthropic (via OpenRouter)
   { value: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet', provider: 'OpenRouter', icon: 'i-ph:robot' },
@@ -10,8 +13,8 @@ const BEST_MODELS = [
   { value: 'anthropic/claude-3-opus', label: 'Claude 3 Opus', provider: 'OpenRouter', icon: 'i-ph:robot' },
   
   // Google Gemini (via OpenRouter - more reliable)
-  { value: 'google/gemini-flash-1.5-8b', label: 'Gemini 1.5 Flash', provider: 'OpenRouter', icon: 'i-ph:google-logo' },
-  { value: 'google/gemini-pro-1.5-exp', label: 'Gemini 1.5 Pro', provider: 'OpenRouter', icon: 'i-ph:google-logo' },
+  { value: 'google/gemini-flash-1.5', label: 'Gemini 1.5 Flash', provider: 'OpenRouter', icon: 'i-ph:google-logo' },
+  { value: 'google/gemini-pro-1.5', label: 'Gemini 1.5 Pro', provider: 'OpenRouter', icon: 'i-ph:google-logo' },
   
   // OpenAI (via OpenRouter)
   { value: 'openai/gpt-4o', label: 'GPT-4o', provider: 'OpenRouter', icon: 'i-ph:brain' },

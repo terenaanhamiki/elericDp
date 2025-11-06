@@ -77,12 +77,10 @@ export default class GoogleProvider extends BaseProvider {
       throw new Error('Invalid response format from Google API');
     }
 
-    // Filter out models with very low token limits and experimental models
+    // Filter out models with very low token limits
     const data = res.models.filter((model: any) => {
-      const modelName = model.name.replace('models/', '');
       const hasGoodTokenLimit = (model.outputTokenLimit || 0) > 8000;
-      const isExperimental = modelName.includes('-exp');
-      return hasGoodTokenLimit && !isExperimental;
+      return hasGoodTokenLimit;
     });
 
     return data.map((m: any) => {
@@ -145,11 +143,6 @@ export default class GoogleProvider extends BaseProvider {
 
     if (!apiKey) {
       throw new Error(`Missing API key for ${this.name} provider`);
-    }
-
-    // Block experimental models
-    if (model.includes('-exp')) {
-      throw new Error(`Experimental model incompatible with Vercel. Please use stable models like gemini-2.5-pro or gemini-2.5-flash instead of -exp models.`);
     }
 
     const google = createGoogleGenerativeAI({
