@@ -126,17 +126,6 @@ export default class GoogleProvider extends BaseProvider {
       defaultApiTokenKey: 'GOOGLE_GENERATIVE_AI_API_KEY',
     });
 
-    // DEBUG: Log API key info
-    console.log('🔑 GOOGLE API KEY DEBUG:', {
-      provider: this.name,
-      model,
-      hasApiKey: !!apiKey,
-      apiKeyLength: apiKey?.length || 0,
-      apiKeyPrefix: apiKey ? apiKey.substring(0, 10) + '...' : 'MISSING',
-      fromCookies: !!apiKeys?.[this.name],
-      fromEnv: !!serverEnv?.GOOGLE_GENERATIVE_AI_API_KEY,
-    });
-
     if (!apiKey) {
       throw new Error(`Missing API key for ${this.name} provider`);
     }
