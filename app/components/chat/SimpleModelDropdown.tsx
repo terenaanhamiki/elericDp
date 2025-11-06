@@ -9,9 +9,9 @@ const BEST_MODELS = [
   { value: 'anthropic/claude-3-5-haiku', label: 'Claude 3.5 Haiku', provider: 'OpenRouter', icon: 'i-ph:robot' },
   { value: 'anthropic/claude-3-opus', label: 'Claude 3 Opus', provider: 'OpenRouter', icon: 'i-ph:robot' },
   
-    // Google Gemini (Direct API)
-  { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash', provider: 'Google', icon: 'i-ph:google-logo' },
-  { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', provider: 'Google', icon: 'i-ph:google-logo' },
+  // Google Gemini (via OpenRouter - more reliable)
+  { value: 'google/gemini-flash-1.5', label: 'Gemini 1.5 Flash', provider: 'OpenRouter', icon: 'i-ph:google-logo' },
+  { value: 'google/gemini-pro-1.5', label: 'Gemini 1.5 Pro', provider: 'OpenRouter', icon: 'i-ph:google-logo' },
   
   // OpenAI (via OpenRouter)
   { value: 'openai/gpt-4o', label: 'GPT-4o', provider: 'OpenRouter', icon: 'i-ph:brain' },
