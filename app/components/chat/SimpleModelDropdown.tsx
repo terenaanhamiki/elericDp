@@ -10,7 +10,7 @@ const BEST_MODELS = [
   { value: 'anthropic/claude-3-opus', label: 'Claude 3 Opus', provider: 'OpenRouter', icon: 'i-ph:robot' },
   
     // Google Gemini (Direct API)
-  { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', provider: 'Google', icon: 'i-ph:google-logo' },
+  { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash', provider: 'Google', icon: 'i-ph:google-logo' },
   { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', provider: 'Google', icon: 'i-ph:google-logo' },
   
   // OpenAI (via OpenRouter)
