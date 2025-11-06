@@ -14,24 +14,17 @@ export default class GoogleProvider extends BaseProvider {
 
   staticModels: ModelInfo[] = [
     {
-    name: 'gemini-1.5-flash-latest',
+    name: 'gemini-1.5-flash',
     label: 'Gemini 1.5 Flash',
     provider: 'Google',
     maxTokenAllowed: 1000000,
     maxCompletionTokens: 8192,
   },
   {
-    name: 'gemini-1.5-pro-latest',
+    name: 'gemini-1.5-pro',
     label: 'Gemini 1.5 Pro',
     provider: 'Google',
     maxTokenAllowed: 2000000,
-    maxCompletionTokens: 8192,
-  },
-  {
-    name: 'gemini-2.0-flash-exp',
-    label: 'Gemini 2.0 Flash Exp',
-    provider: 'Google',
-    maxTokenAllowed: 1000000,
     maxCompletionTokens: 8192,
   },
   ];
