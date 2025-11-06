@@ -188,34 +188,6 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
           </button>
         </div>
       )}
-      {/* TEMPORARY: API Key Testing Input */}
-      <div className="mb-2 p-3 bg-yellow-900/20 border border-yellow-600 rounded-lg">
-        <div className="text-xs text-yellow-400 mb-2 font-semibold">🔧 TESTING MODE - Enter API Key Manually</div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Enter Google API Key (GOOGLE_GENERATIVE_AI_API_KEY)"
-            className="flex-1 px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded text-sm text-bolt-elements-textPrimary"
-            onChange={(e) => {
-              if (e.target.value) {
-                props.onApiKeysChange('Google', e.target.value);
-                toast.success('Google API key set!');
-              }
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Enter OpenRouter API Key (OPEN_ROUTER_API_KEY)"
-            className="flex-1 px-3 py-2 bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded text-sm text-bolt-elements-textPrimary"
-            onChange={(e) => {
-              if (e.target.value) {
-                props.onApiKeysChange('OpenRouter', e.target.value);
-                toast.success('OpenRouter API key set!');
-              }
-            }}
-          />
-        </div>
-      </div>
       <div
         className={classNames('relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg')}
       >

@@ -100,6 +100,17 @@ export default class OpenRouterProvider extends BaseProvider {
       defaultApiTokenKey: 'OPEN_ROUTER_API_KEY',
     });
 
+    // DEBUG: Log API key info
+    console.log('🔑 OPENROUTER API KEY DEBUG:', {
+      provider: this.name,
+      model,
+      hasApiKey: !!apiKey,
+      apiKeyLength: apiKey?.length || 0,
+      apiKeyPrefix: apiKey ? apiKey.substring(0, 15) + '...' : 'MISSING',
+      fromCookies: !!apiKeys?.[this.name],
+      fromEnv: !!serverEnv?.OPEN_ROUTER_API_KEY,
+    });
+
     if (!apiKey) {
       throw new Error(`Missing API key for ${this.name} provider`);
     }

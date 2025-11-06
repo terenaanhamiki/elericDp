@@ -14,34 +14,26 @@ export default class GoogleProvider extends BaseProvider {
 
   staticModels: ModelInfo[] = [
     {
-    name: 'gemini-2.5-pro',
-    label: 'Gemini 2.5 Pro',
-    provider: 'Google',
-    maxTokenAllowed: 2000000,
-    maxCompletionTokens: 8192,
-  },
-  {
-    name: 'gemini-2.5-flash',
-    label: 'Gemini 2.5 Flash',
+    name: 'gemini-1.5-flash-latest',
+    label: 'Gemini 1.5 Flash',
     provider: 'Google',
     maxTokenAllowed: 1000000,
     maxCompletionTokens: 8192,
   },
   {
-    name: 'gemini-1.5-pro',
+    name: 'gemini-1.5-pro-latest',
     label: 'Gemini 1.5 Pro',
     provider: 'Google',
     maxTokenAllowed: 2000000,
     maxCompletionTokens: 8192,
   },
   {
-    name: 'gemini-1.5-flash',
-    label: 'Gemini 1.5 Flash',
+    name: 'gemini-2.0-flash-exp',
+    label: 'Gemini 2.0 Flash Exp',
     provider: 'Google',
     maxTokenAllowed: 1000000,
     maxCompletionTokens: 8192,
   },
-  
   ];
 
   async getDynamicModels(
@@ -139,6 +131,17 @@ export default class GoogleProvider extends BaseProvider {
       serverEnv: serverEnv as any,
       defaultBaseUrlKey: '',
       defaultApiTokenKey: 'GOOGLE_GENERATIVE_AI_API_KEY',
+    });
+
+    // DEBUG: Log API key info
+    console.log('🔑 GOOGLE API KEY DEBUG:', {
+      provider: this.name,
+      model,
+      hasApiKey: !!apiKey,
+      apiKeyLength: apiKey?.length || 0,
+      apiKeyPrefix: apiKey ? apiKey.substring(0, 10) + '...' : 'MISSING',
+      fromCookies: !!apiKeys?.[this.name],
+      fromEnv: !!serverEnv?.GOOGLE_GENERATIVE_AI_API_KEY,
     });
 
     if (!apiKey) {
