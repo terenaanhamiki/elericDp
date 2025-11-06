@@ -5,13 +5,13 @@ import { classNames } from '~/utils/classNames';
 const BEST_MODELS = [
 
   // Anthropic (via OpenRouter)
-  { value: 'anthropic/claude-sonnet-4', label: 'Claude Sonnet 4.5', provider: 'OpenRouter', icon: 'i-ph:robot' },
-  { value: 'anthropic/claude-3.5-haiku', label: 'Claude sonnet 4', provider: 'OpenRouter', icon: 'i-ph:robot' },
+  { value: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet', provider: 'OpenRouter', icon: 'i-ph:robot' },
+  { value: 'anthropic/claude-3-5-haiku', label: 'Claude 3.5 Haiku', provider: 'OpenRouter', icon: 'i-ph:robot' },
   { value: 'anthropic/claude-3-opus', label: 'Claude 3 Opus', provider: 'OpenRouter', icon: 'i-ph:robot' },
   
     // Google Gemini (Direct API)
-  { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Flash', provider: 'Google', icon: 'i-ph:google-logo' },
-  { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', provider: 'Google', icon: 'i-ph:google-logo' },
+  { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', provider: 'Google', icon: 'i-ph:google-logo' },
+  { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', provider: 'Google', icon: 'i-ph:google-logo' },
   
   // OpenAI (via OpenRouter)
   { value: 'openai/gpt-4o', label: 'GPT-4o', provider: 'OpenRouter', icon: 'i-ph:brain' },
@@ -22,8 +22,7 @@ const BEST_MODELS = [
   
 
   // X.AI Grok (via OpenRouter)
-  { value: 'x-ai/grok-4', label: 'Grok 4', provider: 'OpenRouter', icon: 'i-ph:x-logo' },
-  { value: 'x-ai/grok-2-1212', label: 'Grok 3', provider: 'OpenRouter', icon: 'i-ph:x-logo' },
+  { value: 'x-ai/grok-2-1212', label: 'Grok 2', provider: 'OpenRouter', icon: 'i-ph:x-logo' },
   { value: 'x-ai/grok-beta', label: 'Grok Beta', provider: 'OpenRouter', icon: 'i-ph:x-logo' },
   
   // DeepSeek (via OpenRouter)

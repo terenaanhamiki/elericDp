@@ -147,6 +147,11 @@ export default class GoogleProvider extends BaseProvider {
       throw new Error(`Missing API key for ${this.name} provider`);
     }
 
+    // Block experimental models
+    if (model.includes('-exp')) {
+      throw new Error(`Experimental model incompatible with Vercel. Please use stable models like gemini-2.5-pro or gemini-2.5-flash instead of -exp models.`);
+    }
+
     const google = createGoogleGenerativeAI({
       apiKey,
     });
