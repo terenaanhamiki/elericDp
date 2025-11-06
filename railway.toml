@@ -1,6 +1,5 @@
 [build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+builder = "NIXPACKS"
 
 [deploy]
-startCommand = "node node_modules/@remix-run/serve/dist/cli.js build/server/index.js"
+startCommand = "pnpm run start"
