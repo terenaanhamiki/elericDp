@@ -29,8 +29,10 @@ functions/build/
 .env.local
 .env.example
 .env
+.env.railway
 .dev.vars
 *.vars
+get-stripe-prices.js
 .wrangler
 _worker.bundle
 .git
@@ -48,3 +50,7 @@ docs/instructions/Roadmap.md
 .cursorrules
 *.md
 .qodo
+DEPLOYMENT_CHECKLIST.md
+DEPLOYMENT_SUMMARY.md
+RAILWAY_DEPLOYMENT.md
+README_DEPLOYMENT.md
