@@ -350,25 +350,38 @@ export async function streamText(props: {
     ),
   );
 
-  // Production-specific debugging - try minimal params first
+  // Railway deployment fix - use generateText instead of streamText for production
   if (process.env.NODE_ENV === 'production') {
-    logger.info('PRODUCTION DEBUG: Testing with minimal params');
-    
-    // Try with absolute minimal parameters
-    const minimalParams = {
-      model: streamParams.model,
-      messages: streamParams.messages,
-      system: streamParams.system,
-      maxTokens: streamParams.maxTokens,
-    };
-    
-    logger.info('PRODUCTION DEBUG: Minimal params created, attempting stream...');
+    logger.info('PRODUCTION: Using generateText instead of streamText for Railway compatibility');
     
     try {
-      return await _streamText(minimalParams);
+      const { generateText } = await import('ai');
+      
+      const result = await generateText(streamParams);
+      
+      // Convert generateText result to stream format
+      const mockStream = {
+        textStream: (async function* () {
+          yield result.text;
+        })(),
+        fullStream: (async function* () {
+          yield { type: 'text-delta', textDelta: result.text };
+          yield { 
+            type: 'finish', 
+            finishReason: result.finishReason,
+            usage: result.usage 
+          };
+        })(),
+        mergeIntoDataStream: (dataStream: any) => {
+          // Write the complete text at once
+          dataStream.writeData({ type: 'text', content: result.text });
+        }
+      };
+      
+      return mockStream as any;
     } catch (error: any) {
-      logger.error('PRODUCTION DEBUG: Minimal params failed:', error.message);
-      logger.info('PRODUCTION DEBUG: Falling back to full params...');
+      logger.error('PRODUCTION: generateText also failed:', error.message);
+      throw error;
     }
   }
 
