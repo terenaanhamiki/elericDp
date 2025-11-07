@@ -168,14 +168,14 @@
     "unist-util-visit": "^5.0.0",
     "use-debounce": "^10.0.4",
     "zod": "^3.24.1",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "@remix-run/dev": "^2.15.2"
   },
   "devDependencies": {
     "@blitz/eslint-plugin": "0.1.0",
     "@electron/notarize": "^2.5.0",
     "@iconify-json/ph": "^1.2.1",
     "@iconify/types": "^2.0.0",
-    "@remix-run/dev": "^2.15.2",
     "@remix-run/serve": "^2.15.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
