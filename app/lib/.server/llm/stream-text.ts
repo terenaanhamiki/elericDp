@@ -350,8 +350,8 @@ export async function streamText(props: {
     ),
   );
 
-  // Railway deployment fix - throw a special error with the generated text
-  if (process.env.NODE_ENV === 'production') {
+  // Remove Railway-specific workaround - Vercel supports streaming properly
+  if (false && process.env.NODE_ENV === 'production') {
     logger.info('PRODUCTION: Using generateText with special handling for Railway');
     
     try {

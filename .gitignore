@@ -30,6 +30,7 @@ functions/build/
 .env.example
 .env
 .env.railway
+.env.vercel
 .dev.vars
 *.vars
 get-stripe-prices.js
