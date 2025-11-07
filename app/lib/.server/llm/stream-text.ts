@@ -350,75 +350,48 @@ export async function streamText(props: {
     ),
   );
 
-  // Railway deployment fix - use generateText instead of streamText for production
+  // Railway deployment fix - try streamText with timeout first, fallback to generateText
   if (process.env.NODE_ENV === 'production') {
-    logger.info('PRODUCTION: Using generateText instead of streamText for Railway compatibility');
+    logger.info('PRODUCTION: Trying streamText with timeout for Railway');
     
     try {
-      const { generateText } = await import('ai');
+      // Try the original streamText with a timeout
+      const streamPromise = _streamText(streamParams);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Stream timeout')), 10000)
+      );
       
+      const result = await Promise.race([streamPromise, timeoutPromise]);
+      logger.info('PRODUCTION: streamText succeeded!');
+      return result;
+    } catch (error: any) {
+      logger.warn('PRODUCTION: streamText failed, trying generateText fallback:', error.message);
+      
+      // Fallback to generateText
+      const { generateText } = await import('ai');
       const result = await generateText(streamParams);
       
-      logger.info('PRODUCTION: generateText completed successfully');
+      logger.info('PRODUCTION: generateText fallback succeeded, text length:', result?.text?.length || 0);
       
-      // Simple logging to see what we got
-      logger.info('PRODUCTION: Result type:', typeof result);
-      logger.info('PRODUCTION: Result keys:', Object.keys(result || {}));
-      logger.info('PRODUCTION: Text exists:', !!result?.text);
-      logger.info('PRODUCTION: Text length:', result?.text?.length || 0);
-      logger.info('PRODUCTION: Text content:', result?.text || 'NO TEXT');
-
-      // Create a proper stream-like response that matches the original AI SDK format
-      const streamResponse = {
+      // Return the original streamText format but with generateText result
+      return {
         textStream: (async function* () {
-          if (result?.text) {
-            yield result.text;
-          }
+          if (result?.text) yield result.text;
         })(),
-        
         fullStream: (async function* () {
           if (result?.text) {
-            // Yield text delta
-            yield {
-              type: 'text-delta',
-              textDelta: result.text
-            };
+            yield { type: 'text-delta', textDelta: result.text };
           }
-          
-          // Yield finish
-          yield {
-            type: 'finish',
+          yield { 
+            type: 'finish', 
             finishReason: result?.finishReason || 'stop',
-            usage: result?.usage
+            usage: result?.usage 
           };
         })(),
-        
         mergeIntoDataStream: (dataStream: any) => {
-          logger.info('PRODUCTION: mergeIntoDataStream called - using dataStream methods');
-          
-          if (result?.text) {
-            try {
-              // Use the dataStream's writeData method like other parts of the code
-              dataStream.writeData({
-                type: 'text',
-                content: result.text
-              });
-              
-              logger.info('PRODUCTION: Successfully wrote text using writeData');
-            } catch (error) {
-              logger.error('PRODUCTION: Error writing to dataStream:', error);
-            }
-          } else {
-            logger.error('PRODUCTION: No text to write to dataStream');
-          }
+          // Let the fullStream processing handle it
         }
-      };
-      
-      return streamResponse as any;
-    } catch (error: any) {
-      logger.error('PRODUCTION: generateText failed:', error.message);
-      logger.error('PRODUCTION: Error stack:', error.stack);
-      throw error;
+      } as any;
     }
   }
 
