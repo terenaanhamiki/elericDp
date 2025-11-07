@@ -350,48 +350,67 @@ export async function streamText(props: {
     ),
   );
 
-  // Railway deployment fix - try streamText with timeout first, fallback to generateText
+  // Railway deployment fix - use generateText for production
   if (process.env.NODE_ENV === 'production') {
-    logger.info('PRODUCTION: Trying streamText with timeout for Railway');
+    logger.info('PRODUCTION: Using generateText for Railway compatibility');
     
     try {
-      // Try the original streamText with a timeout
-      const streamPromise = _streamText(streamParams);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Stream timeout')), 10000)
-      );
-      
-      const result = await Promise.race([streamPromise, timeoutPromise]);
-      logger.info('PRODUCTION: streamText succeeded!');
-      return result;
-    } catch (error: any) {
-      logger.warn('PRODUCTION: streamText failed, trying generateText fallback:', error.message);
-      
-      // Fallback to generateText
       const { generateText } = await import('ai');
       const result = await generateText(streamParams);
       
-      logger.info('PRODUCTION: generateText fallback succeeded, text length:', result?.text?.length || 0);
+      logger.info('PRODUCTION: generateText succeeded, text:', result?.text?.substring(0, 100));
       
-      // Return the original streamText format but with generateText result
+      // Create a simple response that works with the existing chat processing
       return {
         textStream: (async function* () {
           if (result?.text) yield result.text;
         })(),
+        
         fullStream: (async function* () {
+          // Yield the complete text as a single delta
           if (result?.text) {
-            yield { type: 'text-delta', textDelta: result.text };
+            yield {
+              type: 'text-delta',
+              textDelta: result.text
+            };
           }
-          yield { 
-            type: 'finish', 
+          
+          // Yield finish event
+          yield {
+            type: 'finish',
             finishReason: result?.finishReason || 'stop',
-            usage: result?.usage 
+            usage: result?.usage
           };
         })(),
+        
         mergeIntoDataStream: (dataStream: any) => {
-          // Let the fullStream processing handle it
+          // This gets called first - write the text immediately
+          if (result?.text) {
+            logger.info('PRODUCTION: Writing text to dataStream immediately');
+            
+            // Write text using the same method as progress updates
+            try {
+              dataStream.writeData({
+                type: 'text-delta',
+                textDelta: result.text
+              });
+              
+              dataStream.writeData({
+                type: 'finish',
+                finishReason: result.finishReason || 'stop',
+                usage: result.usage
+              });
+              
+              logger.info('PRODUCTION: Text written successfully');
+            } catch (error) {
+              logger.error('PRODUCTION: Error writing text:', error);
+            }
+          }
         }
       } as any;
+    } catch (error: any) {
+      logger.error('PRODUCTION: generateText failed:', error.message);
+      throw error;
     }
   }
 
