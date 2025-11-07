@@ -359,6 +359,16 @@ export async function streamText(props: {
       
       const result = await generateText(streamParams);
       
+      logger.info('PRODUCTION: generateText completed successfully');
+      
+      // Log the AI response for debugging
+      logger.info('PRODUCTION: AI Response received:', {
+        textLength: result.text?.length || 0,
+        textPreview: result.text?.substring(0, 100) || 'No text',
+        finishReason: result.finishReason,
+        usage: result.usage
+      });
+
       // Convert generateText result to stream format
       const mockStream = {
         textStream: (async function* () {
@@ -373,8 +383,29 @@ export async function streamText(props: {
           };
         })(),
         mergeIntoDataStream: (dataStream: any) => {
-          // Write the complete text at once
-          dataStream.writeData({ type: 'text', content: result.text });
+          logger.info('PRODUCTION: Writing AI response to dataStream');
+          
+          // Write the text content properly
+          if (result.text) {
+            // Split text into chunks to simulate streaming
+            const chunks = result.text.match(/.{1,50}/g) || [result.text];
+            
+            chunks.forEach((chunk, index) => {
+              dataStream.writeData({
+                type: 'text-delta',
+                textDelta: chunk
+              });
+            });
+            
+            // Write finish event
+            dataStream.writeData({
+              type: 'finish',
+              finishReason: result.finishReason || 'stop',
+              usage: result.usage
+            });
+          } else {
+            logger.error('PRODUCTION: No text in AI response!');
+          }
         }
       };
       
