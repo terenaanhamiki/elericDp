@@ -243,7 +243,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
         }
 
         const options: StreamingOptions = {
-          supabaseConnection: supabase,
+          ...(supabase && supabase.isConnected ? { supabaseConnection: supabase } : {}),
           toolChoice: 'auto',
           tools: mcpService.toolsWithoutExecute,
           maxSteps: maxLLMSteps,

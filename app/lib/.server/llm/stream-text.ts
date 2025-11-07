@@ -231,36 +231,40 @@ export async function streamText(props: {
   const tokenParams = isReasoning ? { maxCompletionTokens: safeMaxTokens } : { maxTokens: safeMaxTokens };
 
   // Filter out unsupported parameters for reasoning models AND remove custom parameters that AI SDK doesn't understand
-  const filteredOptions =
-    isReasoning && options
-      ? Object.fromEntries(
-          Object.entries(options).filter(
-            ([key]) =>
-              ![
-                'temperature',
-                'topP',
-                'presencePenalty',
-                'frequencyPenalty',
-                'logprobs',
-                'topLogprobs',
-                'logitBias',
-                'supabaseConnection', // Remove custom parameter
-              ].includes(key),
-          ),
-        )
-      : options
-        ? Object.fromEntries(
-            Object.entries(options).filter(([key]) => key !== 'supabaseConnection'), // Remove custom parameter for all models
-          )
-        : {};
+  const filteredOptions = (() => {
+    if (!options) return {};
+    
+    // Create a clean copy without supabaseConnection first (to avoid circular reference issues)
+    const { supabaseConnection, ...cleanOptions } = options;
+    
+    if (isReasoning) {
+      return Object.fromEntries(
+        Object.entries(cleanOptions).filter(
+          ([key]) =>
+            ![
+              'temperature',
+              'topP',
+              'presencePenalty',
+              'frequencyPenalty',
+              'logprobs',
+              'topLogprobs',
+              'logitBias',
+            ].includes(key),
+        ),
+      );
+    }
+    
+    return cleanOptions;
+  })();
 
-  // DEBUG: Log filtered options
+  // DEBUG: Log filtered options (safely handle supabaseConnection)
+  const safeOriginalOptions = options ? { ...options, supabaseConnection: options.supabaseConnection ? '[SupabaseClient]' : undefined } : {};
   logger.info(
     `DEBUG STREAM: Options filtering for model "${modelDetails.name}":`,
     JSON.stringify(
       {
         isReasoning,
-        originalOptions: options || {},
+        originalOptions: safeOriginalOptions,
         filteredOptions,
         originalOptionsKeys: options ? Object.keys(options) : [],
         filteredOptionsKeys: Object.keys(filteredOptions),

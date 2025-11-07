@@ -152,7 +152,7 @@ export default class GoogleProvider extends BaseProvider {
       });
 
       console.log('[GoogleProvider] Google AI instance created successfully');
-      
+
       // Create model instance with safety settings to prevent blocking
       const modelInstance = google(model, {
         safetySettings: [
@@ -163,7 +163,7 @@ export default class GoogleProvider extends BaseProvider {
         ],
       });
       console.log('[GoogleProvider] Model instance created for:', model);
-      
+
       return modelInstance;
     } catch (error: any) {
       console.error('[GoogleProvider] Error creating Google AI instance:', error);
