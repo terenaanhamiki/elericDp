@@ -45,22 +45,8 @@ export abstract class BaseProvider implements ProviderInfo {
     }
 
     const apiTokenKey = this.config.apiTokenKey || defaultApiTokenKey;
-    
-    // Debug API key resolution
-    const fromApiKeys = apiKeys?.[this.name];
-    const fromServerEnv = serverEnv?.[apiTokenKey];
-    const fromProcessEnv = process?.env?.[apiTokenKey];
-    const fromManagerEnv = manager.env?.[apiTokenKey];
-    
-    console.log(`[${this.name}Provider] API Key Resolution:`, {
-      apiTokenKey,
-      fromApiKeys: fromApiKeys ? `${fromApiKeys.substring(0, 10)}...` : 'MISSING',
-      fromServerEnv: fromServerEnv ? `${fromServerEnv.substring(0, 10)}...` : 'MISSING',
-      fromProcessEnv: fromProcessEnv ? `${fromProcessEnv.substring(0, 10)}...` : 'MISSING',
-      fromManagerEnv: fromManagerEnv ? `${fromManagerEnv.substring(0, 10)}...` : 'MISSING',
-    });
-    
-    const apiKey = fromApiKeys || fromServerEnv || fromProcessEnv || fromManagerEnv;
+    const apiKey =
+      apiKeys?.[this.name] || serverEnv?.[apiTokenKey] || process?.env?.[apiTokenKey] || manager.env?.[apiTokenKey];
 
     return {
       baseUrl,

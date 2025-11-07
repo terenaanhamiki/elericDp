@@ -15,16 +15,23 @@ export default class GoogleProvider extends BaseProvider {
   staticModels: ModelInfo[] = [
     {
       name: 'gemini-2.5-flash',
-      label: 'Gemini 2.5 pro',
+      label: 'Gemini 2.5 Flash',
       provider: 'Google',
       maxTokenAllowed: 2000000,
       maxCompletionTokens: 8192,
     },
     {
-      name: 'gemini-2.5-flash',
-      label: 'Gemini 2.5 Flash',
+      name: 'gemini-2.0-flash-exp',
+      label: 'Gemini 2.0 Flash Exp',
       provider: 'Google',
       maxTokenAllowed: 1000000,
+      maxCompletionTokens: 8192,
+    },
+    {
+      name: 'gemini-exp-1206',
+      label: 'Gemini Exp 1206',
+      provider: 'Google',
+      maxTokenAllowed: 2000000,
       maxCompletionTokens: 8192,
     },
   ];
@@ -120,17 +127,6 @@ export default class GoogleProvider extends BaseProvider {
   }): LanguageModelV1 {
     const { model, serverEnv, apiKeys, providerSettings } = options;
 
-    // Debug logging for production issues
-    console.log('[GoogleProvider] Debug info:', {
-      model,
-      hasServerEnv: !!serverEnv,
-      hasApiKeys: !!apiKeys,
-      apiKeysForGoogle: apiKeys?.[this.name],
-      serverEnvKey: serverEnv?.['GOOGLE_GENERATIVE_AI_API_KEY'],
-      processEnvKey: process?.env?.['GOOGLE_GENERATIVE_AI_API_KEY'],
-      nodeEnv: process?.env?.NODE_ENV,
-    });
-
     const { apiKey } = this.getProviderBaseUrlAndKey({
       apiKeys,
       providerSettings: providerSettings?.[this.name],
@@ -139,17 +135,12 @@ export default class GoogleProvider extends BaseProvider {
       defaultApiTokenKey: 'GOOGLE_GENERATIVE_AI_API_KEY',
     });
 
-    console.log('[GoogleProvider] Resolved API key:', apiKey ? `${apiKey.substring(0, 10)}...` : 'MISSING');
-
-    // Fallback for production environment issues
-    const finalApiKey = apiKey || 'AIzaSyAocwjDSDHM5WsfrD7NkopeOECvhobb6Os';
-
-    if (!finalApiKey) {
-      throw new Error(`Missing API key for ${this.name} provider. Check environment variables in production.`);
+    if (!apiKey) {
+      throw new Error(`Missing API key for ${this.name} provider`);
     }
 
     const google = createGoogleGenerativeAI({
-      apiKey: finalApiKey,
+      apiKey,
     });
 
     return google(model);
