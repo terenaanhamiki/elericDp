@@ -230,7 +230,7 @@ export async function streamText(props: {
   // Use maxCompletionTokens for reasoning models (o1, GPT-5), maxTokens for traditional models
   const tokenParams = isReasoning ? { maxCompletionTokens: safeMaxTokens } : { maxTokens: safeMaxTokens };
 
-  // Filter out unsupported parameters for reasoning models
+  // Filter out unsupported parameters for reasoning models AND remove custom parameters that AI SDK doesn't understand
   const filteredOptions =
     isReasoning && options
       ? Object.fromEntries(
@@ -244,10 +244,15 @@ export async function streamText(props: {
                 'logprobs',
                 'topLogprobs',
                 'logitBias',
+                'supabaseConnection', // Remove custom parameter
               ].includes(key),
           ),
         )
-      : options || {};
+      : options
+        ? Object.fromEntries(
+            Object.entries(options).filter(([key]) => key !== 'supabaseConnection'), // Remove custom parameter for all models
+          )
+        : {};
 
   // DEBUG: Log filtered options
   logger.info(

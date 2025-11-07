@@ -159,7 +159,10 @@ Note:
         * DO not need to think too much just start writing imidiately
         * do not write any thing other that the summary with with the provided structure
         `,
-    prompt: `
+    messages: [
+      {
+        role: 'user',
+        content: `
 
 Here is the previous summary of the chat:
 <old_summary>
@@ -179,6 +182,8 @@ ${slicedMessages
 
 Please provide a summary of the chat till now including the hitorical summary of the chat.
 `,
+      },
+    ],
     model: provider.getModelInstance({
       model: currentModel,
       serverEnv,

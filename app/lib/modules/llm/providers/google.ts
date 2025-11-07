@@ -3,7 +3,6 @@ import type { ModelInfo } from '~/lib/modules/llm/types';
 import type { IProviderSetting } from '~/types/model';
 import type { LanguageModelV1 } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export default class GoogleProvider extends BaseProvider {
   name = 'Google';
@@ -149,13 +148,20 @@ export default class GoogleProvider extends BaseProvider {
 
     try {
       const google = createGoogleGenerativeAI({
-        apiKey: apiKey.trim(), // Ensure no whitespace
-        // Try without custom baseURL first
+        apiKey: apiKey.trim(),
       });
 
       console.log('[GoogleProvider] Google AI instance created successfully');
       
-      const modelInstance = google(model);
+      // Create model instance with safety settings to prevent blocking
+      const modelInstance = google(model, {
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        ],
+      });
       console.log('[GoogleProvider] Model instance created for:', model);
       
       return modelInstance;

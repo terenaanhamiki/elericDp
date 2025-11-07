@@ -152,7 +152,10 @@ export async function selectContext(props: {
         * You should not include any file that is already in the context buffer.
         * If no changes are needed, you can leave the response empty updateContextBuffer tag.
         `,
-    prompt: `
+    messages: [
+      {
+        role: 'user',
+        content: `
         ${summaryText}
 
         Users Question: ${extractTextContent(lastUserMessage)}
@@ -168,6 +171,8 @@ export async function selectContext(props: {
         * if the buffer is full, you need to exclude files that is not needed and include files that is relevent.
 
         `,
+      },
+    ],
     model: provider.getModelInstance({
       model: currentModel,
       serverEnv,

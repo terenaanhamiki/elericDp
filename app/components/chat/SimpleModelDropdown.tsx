@@ -15,7 +15,7 @@ const BEST_MODELS = [
 
   // OpenAI (via OpenRouter)
   { value: 'openai/gpt-4o', label: 'GPT-4o', provider: 'OpenRouter', icon: 'i-ph:brain' },
-  { value: 'qwen/qwen3-coder', label: 'qwen3-coder', provider: 'OpenRouter', icon: 'i-ph:wind' },
+  { value: 'qwen/qwen-2.5-coder-32b-instruct', label: 'Qwen 2.5 Coder 32B', provider: 'OpenRouter', icon: 'i-ph:wind' },
 
   { value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini', provider: 'OpenRouter', icon: 'i-ph:brain' },
   { value: 'openai/o1', label: 'GPT-o1', provider: 'OpenRouter', icon: 'i-ph:brain' },
