@@ -394,23 +394,20 @@ export async function streamText(props: {
         })(),
         
         mergeIntoDataStream: (dataStream: any) => {
-          logger.info('PRODUCTION: mergeIntoDataStream called - writing response directly');
+          logger.info('PRODUCTION: mergeIntoDataStream called - using dataStream methods');
           
           if (result?.text) {
-            // Write the text directly to the dataStream
-            const encoder = new TextEncoder();
-            const textData = `0:${JSON.stringify({ type: 'text-delta', textDelta: result.text })}\n`;
-            dataStream.write(encoder.encode(textData));
-            
-            // Write finish event
-            const finishData = `0:${JSON.stringify({ 
-              type: 'finish', 
-              finishReason: result.finishReason || 'stop',
-              usage: result.usage 
-            })}\n`;
-            dataStream.write(encoder.encode(finishData));
-            
-            logger.info('PRODUCTION: Successfully wrote text to dataStream');
+            try {
+              // Use the dataStream's writeData method like other parts of the code
+              dataStream.writeData({
+                type: 'text',
+                content: result.text
+              });
+              
+              logger.info('PRODUCTION: Successfully wrote text using writeData');
+            } catch (error) {
+              logger.error('PRODUCTION: Error writing to dataStream:', error);
+            }
           } else {
             logger.error('PRODUCTION: No text to write to dataStream');
           }
