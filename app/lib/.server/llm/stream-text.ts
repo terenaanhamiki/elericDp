@@ -361,57 +361,50 @@ export async function streamText(props: {
       
       logger.info('PRODUCTION: generateText completed successfully');
       
-      // Log the AI response for debugging
-      logger.info('PRODUCTION: AI Response received:', {
-        textLength: result.text?.length || 0,
-        textPreview: result.text?.substring(0, 100) || 'No text',
-        finishReason: result.finishReason,
-        usage: result.usage
-      });
+      // Simple logging to see what we got
+      logger.info('PRODUCTION: Result type:', typeof result);
+      logger.info('PRODUCTION: Result keys:', Object.keys(result || {}));
+      logger.info('PRODUCTION: Text exists:', !!result?.text);
+      logger.info('PRODUCTION: Text length:', result?.text?.length || 0);
+      logger.info('PRODUCTION: Text content:', result?.text || 'NO TEXT');
 
-      // Convert generateText result to stream format
-      const mockStream = {
+      // Create a proper stream-like response that matches the original AI SDK format
+      const streamResponse = {
         textStream: (async function* () {
-          yield result.text;
+          if (result?.text) {
+            yield result.text;
+          }
         })(),
+        
         fullStream: (async function* () {
-          yield { type: 'text-delta', textDelta: result.text };
-          yield { 
-            type: 'finish', 
-            finishReason: result.finishReason,
-            usage: result.usage 
+          if (result?.text) {
+            // Yield text delta
+            yield {
+              type: 'text-delta',
+              textDelta: result.text
+            };
+          }
+          
+          // Yield finish
+          yield {
+            type: 'finish',
+            finishReason: result?.finishReason || 'stop',
+            usage: result?.usage
           };
         })(),
+        
         mergeIntoDataStream: (dataStream: any) => {
-          logger.info('PRODUCTION: Writing AI response to dataStream');
+          logger.info('PRODUCTION: mergeIntoDataStream called');
           
-          // Write the text content properly
-          if (result.text) {
-            // Split text into chunks to simulate streaming
-            const chunks = result.text.match(/.{1,50}/g) || [result.text];
-            
-            chunks.forEach((chunk, index) => {
-              dataStream.writeData({
-                type: 'text-delta',
-                textDelta: chunk
-              });
-            });
-            
-            // Write finish event
-            dataStream.writeData({
-              type: 'finish',
-              finishReason: result.finishReason || 'stop',
-              usage: result.usage
-            });
-          } else {
-            logger.error('PRODUCTION: No text in AI response!');
-          }
+          // Don't do anything here - let the fullStream handle it
+          // The original code processes fullStream in the chat route
         }
       };
       
-      return mockStream as any;
+      return streamResponse as any;
     } catch (error: any) {
-      logger.error('PRODUCTION: generateText also failed:', error.message);
+      logger.error('PRODUCTION: generateText failed:', error.message);
+      logger.error('PRODUCTION: Error stack:', error.stack);
       throw error;
     }
   }
