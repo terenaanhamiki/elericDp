@@ -399,9 +399,11 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
           if (error.message === 'RAILWAY_SUCCESS' && error.generatedText) {
             logger.info('PRODUCTION: Handling Railway success case');
             
-            // Write the generated text directly to dataStream
-            dataStream.writeData({
-              type: 'text',
+            // Write the generated text in the format the frontend expects
+            dataStream.writeMessageAnnotation({
+              type: 'message',
+              id: 'msg-' + Date.now(),
+              role: 'assistant',
               content: error.generatedText
             });
             
