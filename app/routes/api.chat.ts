@@ -242,18 +242,20 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
           // logger.debug('Code Files Selected');
         }
 
-        const options: StreamingOptions = {
-          ...(supabase && supabase.isConnected ? { supabaseConnection: supabase } : {}),
-          toolChoice: 'auto',
-          tools: mcpService.toolsWithoutExecute,
-          maxSteps: maxLLMSteps,
-          onStepFinish: ({ toolCalls }) => {
-            // add tool call annotations for frontend processing
-            toolCalls.forEach((toolCall) => {
+        // Create safe callback functions that don't capture complex objects
+        const safeOnStepFinish = ({ toolCalls }: { toolCalls: any[] }) => {
+          // add tool call annotations for frontend processing
+          toolCalls.forEach((toolCall) => {
+            try {
               mcpService.processToolCall(toolCall, dataStream);
-            });
-          },
-          onFinish: async ({ text: content, finishReason, usage }) => {
+            } catch (error) {
+              console.error('Error in processToolCall:', error);
+            }
+          });
+        };
+
+        const safeOnFinish = async ({ text: content, finishReason, usage }: { text: string; finishReason: string; usage?: any }) => {
+          try {
             logger.debug('usage', JSON.stringify(usage));
 
             if (usage) {
@@ -351,7 +353,18 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
             })();
 
             return;
-          },
+          } catch (error) {
+            logger.error('Error in onFinish callback:', error);
+          }
+        };
+
+        const options: StreamingOptions = {
+          ...(supabase && supabase.isConnected ? { supabaseConnection: supabase } : {}),
+          toolChoice: 'auto',
+          tools: mcpService.toolsWithoutExecute,
+          maxSteps: maxLLMSteps,
+          onStepFinish: safeOnStepFinish,
+          onFinish: safeOnFinish,
         };
 
         dataStream.writeData({

@@ -161,6 +161,13 @@ export default class GoogleProvider extends BaseProvider {
           { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
           { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
         ],
+        // Add additional configuration to handle streaming issues
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.8,
+          topK: 40,
+          maxOutputTokens: 8192,
+        },
       });
       console.log('[GoogleProvider] Model instance created for:', model);
 

@@ -275,7 +275,18 @@ export async function streamText(props: {
     ),
   );
 
-  const streamParams = {
+  // Apply provider-specific parameter filtering
+  const providerSpecificOptions = (() => {
+    if (provider.name === 'Google') {
+      // Google doesn't support toolChoice parameter, only tools
+      const { toolChoice, ...googleOptions } = filteredOptions;
+      return googleOptions;
+    }
+    return filteredOptions;
+  })();
+
+  // Create a clean streamParams object to avoid production serialization issues
+  const baseParams = {
     model: provider.getModelInstance({
       model: modelDetails.name,
       serverEnv,
@@ -283,31 +294,89 @@ export async function streamText(props: {
       providerSettings,
     }),
     system: chatMode === 'build' ? systemPrompt : discussPrompt(),
-    ...tokenParams,
     messages: convertToCoreMessages(processedMessages as any),
-    ...filteredOptions,
-
-    // Set temperature to 1 for reasoning models (required by OpenAI API)
-    ...(isReasoning ? { temperature: 1 } : {}),
   };
 
-  // DEBUG: Log final streaming parameters
+  // Add token parameters
+  const withTokens = { ...baseParams, ...tokenParams };
+
+  // Add temperature for reasoning models
+  const withTemperature = isReasoning ? { ...withTokens, temperature: 1 } : withTokens;
+
+  // Add provider-specific options one by one to avoid spread issues
+  const streamParams: any = { ...withTemperature };
+  
+  // Safely add each option to avoid production serialization issues
+  Object.keys(providerSpecificOptions).forEach(key => {
+    const value = providerSpecificOptions[key];
+    // Only add serializable values
+    if (value !== undefined && value !== null) {
+      if (typeof value === 'function') {
+        streamParams[key] = value; // Functions are OK for AI SDK
+      } else if (typeof value === 'object') {
+        try {
+          JSON.stringify(value); // Test if serializable
+          streamParams[key] = value;
+        } catch (e) {
+          logger.warn(`Skipping non-serializable option: ${key}`);
+        }
+      } else {
+        streamParams[key] = value; // Primitives are safe
+      }
+    }
+  });
+
+  // DEBUG: Log final streaming parameters (safely)
+  const safeStreamParams = Object.fromEntries(
+    Object.entries(streamParams)
+      .filter(([key]) => !['model', 'messages', 'system', 'onStepFinish', 'onFinish'].includes(key))
+      .map(([key, value]) => [key, typeof value === 'function' ? '[Function]' : value])
+  );
+  
   logger.info(
-    `DEBUG STREAM: Final streaming params for model "${modelDetails.name}":`,
+    `DEBUG STREAM: Final streaming params for ${provider.name} model "${modelDetails.name}":`,
     JSON.stringify(
       {
+        providerName: provider.name,
         hasTemperature: 'temperature' in streamParams,
         hasMaxTokens: 'maxTokens' in streamParams,
         hasMaxCompletionTokens: 'maxCompletionTokens' in streamParams,
+        hasToolChoice: 'toolChoice' in streamParams,
         paramKeys: Object.keys(streamParams).filter((key) => !['model', 'messages', 'system'].includes(key)),
-        streamParams: Object.fromEntries(
-          Object.entries(streamParams).filter(([key]) => !['model', 'messages', 'system'].includes(key)),
-        ),
+        streamParams: safeStreamParams,
       },
       null,
       2,
     ),
   );
+
+  // Production-specific debugging
+  if (process.env.NODE_ENV === 'production') {
+    logger.info('PRODUCTION DEBUG: About to call _streamText with params:', {
+      modelName: modelDetails.name,
+      providerName: provider.name,
+      hasModel: !!streamParams.model,
+      hasSystem: !!streamParams.system,
+      hasMessages: !!streamParams.messages,
+      messageCount: streamParams.messages?.length || 0,
+      paramKeys: Object.keys(streamParams),
+      // Test if streamParams can be serialized
+      canSerialize: (() => {
+        try {
+          JSON.stringify(streamParams, (key, value) => {
+            if (typeof value === 'function') return '[Function]';
+            if (value && typeof value === 'object' && value.constructor && value.constructor.name !== 'Object' && value.constructor.name !== 'Array') {
+              return `[${value.constructor.name}]`;
+            }
+            return value;
+          });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      })(),
+    });
+  }
 
   return await _streamText(streamParams);
 }
