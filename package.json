@@ -24,7 +24,7 @@
     "dockerbuild": "docker build -t bolt-ai:development -t bolt-ai:latest --target development .",
     "typecheck": "tsc",
     "preview": "pnpm run build && pnpm run start",
-    "prepare": "husky",
+    "prepare": "is-ci || husky",
     "clean": "node scripts/clean.js",
     "deploy:vercel": "node deploy-vercel.js",
     "setup:env": "node setup-env.js",
