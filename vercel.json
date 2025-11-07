@@ -2,12 +2,5 @@
   "buildCommand": "pnpm run build",
   "devCommand": "pnpm run dev",
   "installCommand": "pnpm install",
-  "framework": "remix",
-  "serverlessFunctionConfig": {
-    "maxDuration": 60
-  },
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "regions": ["iad1"]
+  "framework": "remix"
 }
