@@ -3,19 +3,11 @@
   "devCommand": "pnpm run dev",
   "installCommand": "pnpm install",
   "framework": "remix",
-  "functions": {
-    "app/routes/api.*.ts": {
-      "maxDuration": 60
-    }
+  "serverlessFunctionConfig": {
+    "maxDuration": 60
   },
   "env": {
     "NODE_ENV": "production"
   },
-  "regions": ["iad1"],
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/app/$1"
-    }
-  ]
+  "regions": ["iad1"]
 }
