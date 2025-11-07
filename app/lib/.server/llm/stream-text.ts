@@ -350,66 +350,28 @@ export async function streamText(props: {
     ),
   );
 
-  // Railway deployment fix - use generateText for production
+  // Railway deployment fix - throw a special error with the generated text
   if (process.env.NODE_ENV === 'production') {
-    logger.info('PRODUCTION: Using generateText for Railway compatibility');
+    logger.info('PRODUCTION: Using generateText with special handling for Railway');
     
     try {
       const { generateText } = await import('ai');
       const result = await generateText(streamParams);
       
-      logger.info('PRODUCTION: generateText succeeded, text:', result?.text?.substring(0, 100));
+      logger.info('PRODUCTION: Generated text length:', result?.text?.length || 0);
       
-      // Create a simple response that works with the existing chat processing
-      return {
-        textStream: (async function* () {
-          if (result?.text) yield result.text;
-        })(),
-        
-        fullStream: (async function* () {
-          // Yield the complete text as a single delta
-          if (result?.text) {
-            yield {
-              type: 'text-delta',
-              textDelta: result.text
-            };
-          }
-          
-          // Yield finish event
-          yield {
-            type: 'finish',
-            finishReason: result?.finishReason || 'stop',
-            usage: result?.usage
-          };
-        })(),
-        
-        mergeIntoDataStream: (dataStream: any) => {
-          // Write the text in the format that useChat expects
-          if (result?.text) {
-            logger.info('PRODUCTION: Writing text for useChat compatibility');
-            
-            try {
-              // Write as a message completion - this is what useChat expects
-              const messageData = {
-                id: 'msg-' + Date.now(),
-                role: 'assistant',
-                content: result.text
-              };
-              
-              // Write the message data
-              dataStream.writeData({
-                type: 'message',
-                data: messageData
-              });
-              
-              logger.info('PRODUCTION: Message written for useChat');
-            } catch (error) {
-              logger.error('PRODUCTION: Error writing message:', error);
-            }
-          }
-        }
-      } as any;
+      // Throw a special error that contains the generated text
+      // This will be caught in the chat route and handled specially
+      const specialError = new Error('RAILWAY_SUCCESS') as any;
+      specialError.generatedText = result?.text || '';
+      specialError.usage = result?.usage;
+      specialError.finishReason = result?.finishReason;
+      
+      throw specialError;
     } catch (error: any) {
+      if (error.message === 'RAILWAY_SUCCESS') {
+        throw error; // Re-throw our special error
+      }
       logger.error('PRODUCTION: generateText failed:', error.message);
       throw error;
     }

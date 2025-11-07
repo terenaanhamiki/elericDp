@@ -376,21 +376,66 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
           message: 'Generating Response',
         } satisfies ProgressAnnotation);
 
-        const result = await streamText({
-          messages: [...processedMessages],
-          env: process.env,
-          options,
-          apiKeys,
-          files,
-          providerSettings,
-          promptId,
-          contextOptimization,
-          contextFiles: filteredFiles,
-          chatMode,
-          designScheme,
-          summary,
-          messageSliceId,
-        });
+        let result;
+        
+        try {
+          result = await streamText({
+            messages: [...processedMessages],
+            env: process.env,
+            options,
+            apiKeys,
+            files,
+            providerSettings,
+            promptId,
+            contextOptimization,
+            contextFiles: filteredFiles,
+            chatMode,
+            designScheme,
+            summary,
+            messageSliceId,
+          });
+        } catch (error: any) {
+          // Handle Railway special case
+          if (error.message === 'RAILWAY_SUCCESS' && error.generatedText) {
+            logger.info('PRODUCTION: Handling Railway success case');
+            
+            // Write the generated text directly to dataStream
+            dataStream.writeData({
+              type: 'text',
+              content: error.generatedText
+            });
+            
+            // Write usage data
+            if (error.usage) {
+              cumulativeUsage.completionTokens += error.usage.completionTokens || 0;
+              cumulativeUsage.promptTokens += error.usage.promptTokens || 0;
+              cumulativeUsage.totalTokens += error.usage.totalTokens || 0;
+              
+              dataStream.writeMessageAnnotation({
+                type: 'usage',
+                value: {
+                  completionTokens: cumulativeUsage.completionTokens,
+                  promptTokens: cumulativeUsage.promptTokens,
+                  totalTokens: cumulativeUsage.totalTokens,
+                },
+              });
+            }
+            
+            // Write completion status
+            dataStream.writeData({
+              type: 'progress',
+              label: 'response',
+              status: 'complete',
+              order: progressCounter++,
+              message: 'Response Generated',
+            });
+            
+            logger.info('PRODUCTION: Railway response written successfully');
+            return; // Exit early for Railway case
+          }
+          
+          throw error; // Re-throw other errors
+        }
 
         (async () => {
           try {
