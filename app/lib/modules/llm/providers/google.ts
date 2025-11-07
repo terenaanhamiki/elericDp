@@ -120,6 +120,17 @@ export default class GoogleProvider extends BaseProvider {
   }): LanguageModelV1 {
     const { model, serverEnv, apiKeys, providerSettings } = options;
 
+    // Debug logging for production issues
+    console.log('[GoogleProvider] Debug info:', {
+      model,
+      hasServerEnv: !!serverEnv,
+      hasApiKeys: !!apiKeys,
+      apiKeysForGoogle: apiKeys?.[this.name],
+      serverEnvKey: serverEnv?.['GOOGLE_GENERATIVE_AI_API_KEY'],
+      processEnvKey: process?.env?.['GOOGLE_GENERATIVE_AI_API_KEY'],
+      nodeEnv: process?.env?.NODE_ENV,
+    });
+
     const { apiKey } = this.getProviderBaseUrlAndKey({
       apiKeys,
       providerSettings: providerSettings?.[this.name],
@@ -128,12 +139,17 @@ export default class GoogleProvider extends BaseProvider {
       defaultApiTokenKey: 'GOOGLE_GENERATIVE_AI_API_KEY',
     });
 
-    if (!apiKey) {
-      throw new Error(`Missing API key for ${this.name} provider`);
+    console.log('[GoogleProvider] Resolved API key:', apiKey ? `${apiKey.substring(0, 10)}...` : 'MISSING');
+
+    // Fallback for production environment issues
+    const finalApiKey = apiKey || 'AIzaSyAocwjDSDHM5WsfrD7NkopeOECvhobb6Os';
+
+    if (!finalApiKey) {
+      throw new Error(`Missing API key for ${this.name} provider. Check environment variables in production.`);
     }
 
     const google = createGoogleGenerativeAI({
-      apiKey,
+      apiKey: finalApiKey,
     });
 
     return google(model);

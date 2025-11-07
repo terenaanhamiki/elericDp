@@ -8,32 +8,32 @@ const BEST_MODELS = [
   { value: 'anthropic/claude-sonnet-4', label: 'Claude Sonnet 4.5', provider: 'OpenRouter', icon: 'i-ph:robot' },
   { value: 'anthropic/claude-3.5-haiku', label: 'Claude sonnet 4', provider: 'OpenRouter', icon: 'i-ph:robot' },
   { value: 'anthropic/claude-3-opus', label: 'Claude 3 Opus', provider: 'OpenRouter', icon: 'i-ph:robot' },
-  
-    // Google Gemini (Direct API)
+
+  // Google Gemini (Direct API)
   { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', provider: 'Google', icon: 'i-ph:google-logo' },
-  { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash', provider: 'Google', icon: 'i-ph:google-logo' },
-  
+  { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', provider: 'Google', icon: 'i-ph:google-logo' },
+
   // OpenAI (via OpenRouter)
   { value: 'openai/gpt-4o', label: 'GPT-4o', provider: 'OpenRouter', icon: 'i-ph:brain' },
-    { value: 'qwen/qwen3-coder', label: 'qwen3-coder', provider: 'OpenRouter', icon: 'i-ph:wind' },
+  { value: 'qwen/qwen3-coder', label: 'qwen3-coder', provider: 'OpenRouter', icon: 'i-ph:wind' },
 
   { value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini', provider: 'OpenRouter', icon: 'i-ph:brain' },
   { value: 'openai/o1', label: 'GPT-o1', provider: 'OpenRouter', icon: 'i-ph:brain' },
-  
+
 
   // X.AI Grok (via OpenRouter)
   { value: 'x-ai/grok-4', label: 'Grok 4', provider: 'OpenRouter', icon: 'i-ph:x-logo' },
   { value: 'x-ai/grok-2-1212', label: 'Grok 3', provider: 'OpenRouter', icon: 'i-ph:x-logo' },
   { value: 'x-ai/grok-beta', label: 'Grok Beta', provider: 'OpenRouter', icon: 'i-ph:x-logo' },
-  
+
   // DeepSeek (via OpenRouter)
   { value: 'deepseek/deepseek-chat', label: 'DeepSeek Chat', provider: 'OpenRouter', icon: 'i-ph:brain' },
   { value: 'deepseek/deepseek-r1', label: 'DeepSeek R1', provider: 'OpenRouter', icon: 'i-ph:brain' },
-  
+
   // Meta Llama (via OpenRouter)
   { value: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B', provider: 'OpenRouter', icon: 'i-ph:lightning' },
   { value: 'meta-llama/llama-3.1-405b-instruct', label: 'Llama 3.1 405B', provider: 'OpenRouter', icon: 'i-ph:lightning' },
-  
+
   // Mistral (via OpenRouter)
   { value: 'mistralai/mistral-medium', label: 'Mistral Medium', provider: 'OpenRouter', icon: 'i-ph:wind' },
 
