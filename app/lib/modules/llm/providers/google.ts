@@ -3,6 +3,7 @@ import type { ModelInfo } from '~/lib/modules/llm/types';
 import type { IProviderSetting } from '~/types/model';
 import type { LanguageModelV1 } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export default class GoogleProvider extends BaseProvider {
   name = 'Google';
@@ -139,10 +140,28 @@ export default class GoogleProvider extends BaseProvider {
       throw new Error(`Missing API key for ${this.name} provider`);
     }
 
-    const google = createGoogleGenerativeAI({
-      apiKey,
+    console.log('[GoogleProvider] Creating Google AI instance with:', {
+      model,
+      apiKeyLength: apiKey.length,
+      apiKeyPrefix: apiKey.substring(0, 15),
+      nodeEnv: process.env.NODE_ENV,
     });
 
-    return google(model);
+    try {
+      const google = createGoogleGenerativeAI({
+        apiKey: apiKey.trim(), // Ensure no whitespace
+        // Try without custom baseURL first
+      });
+
+      console.log('[GoogleProvider] Google AI instance created successfully');
+      
+      const modelInstance = google(model);
+      console.log('[GoogleProvider] Model instance created for:', model);
+      
+      return modelInstance;
+    } catch (error: any) {
+      console.error('[GoogleProvider] Error creating Google AI instance:', error);
+      throw new Error(`Failed to create Google AI instance: ${error.message}`);
+    }
   }
 }
