@@ -363,8 +363,9 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
           toolChoice: 'auto',
           tools: mcpService.toolsWithoutExecute,
           maxSteps: maxLLMSteps,
-          onStepFinish: safeOnStepFinish,
-          onFinish: safeOnFinish,
+          // Temporarily remove callbacks to test if they're causing production issues
+          // onStepFinish: safeOnStepFinish,
+          // onFinish: safeOnFinish,
         };
 
         dataStream.writeData({
@@ -393,6 +394,10 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
 
         (async () => {
           try {
+            let finalContent = '';
+            let finalUsage: any = null;
+            let finalFinishReason = '';
+
             for await (const part of result.fullStream) {
               streamRecovery.updateActivity();
 
@@ -418,7 +423,42 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
 
                 return;
               }
+
+              // Handle tool calls (equivalent to onStepFinish)
+              if (part.type === 'step-finish' && part.toolCalls) {
+                try {
+                  part.toolCalls.forEach((toolCall) => {
+                    mcpService.processToolCall(toolCall, dataStream);
+                  });
+                } catch (error) {
+                  console.error('Error processing tool calls:', error);
+                }
+              }
+
+              // Collect final content and usage
+              if (part.type === 'text-delta') {
+                finalContent += part.textDelta;
+              }
+              
+              if (part.type === 'finish') {
+                finalFinishReason = part.finishReason;
+                finalUsage = part.usage;
+              }
             }
+
+            // Handle finish callback manually
+            if (finalUsage) {
+              try {
+                await safeOnFinish({ 
+                  text: finalContent, 
+                  finishReason: finalFinishReason, 
+                  usage: finalUsage 
+                });
+              } catch (error) {
+                console.error('Error in finish callback:', error);
+              }
+            }
+
             streamRecovery.stop();
           } catch (streamError: any) {
             logger.error('Fatal streaming error:', streamError);
