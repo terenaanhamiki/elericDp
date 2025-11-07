@@ -350,32 +350,26 @@ export async function streamText(props: {
     ),
   );
 
-  // Production-specific debugging
+  // Production-specific debugging - try minimal params first
   if (process.env.NODE_ENV === 'production') {
-    logger.info('PRODUCTION DEBUG: About to call _streamText with params:', {
-      modelName: modelDetails.name,
-      providerName: provider.name,
-      hasModel: !!streamParams.model,
-      hasSystem: !!streamParams.system,
-      hasMessages: !!streamParams.messages,
-      messageCount: streamParams.messages?.length || 0,
-      paramKeys: Object.keys(streamParams),
-      // Test if streamParams can be serialized
-      canSerialize: (() => {
-        try {
-          JSON.stringify(streamParams, (key, value) => {
-            if (typeof value === 'function') return '[Function]';
-            if (value && typeof value === 'object' && value.constructor && value.constructor.name !== 'Object' && value.constructor.name !== 'Array') {
-              return `[${value.constructor.name}]`;
-            }
-            return value;
-          });
-          return true;
-        } catch (e) {
-          return false;
-        }
-      })(),
-    });
+    logger.info('PRODUCTION DEBUG: Testing with minimal params');
+    
+    // Try with absolute minimal parameters
+    const minimalParams = {
+      model: streamParams.model,
+      messages: streamParams.messages,
+      system: streamParams.system,
+      maxTokens: streamParams.maxTokens,
+    };
+    
+    logger.info('PRODUCTION DEBUG: Minimal params created, attempting stream...');
+    
+    try {
+      return await _streamText(minimalParams);
+    } catch (error: any) {
+      logger.error('PRODUCTION DEBUG: Minimal params failed:', error.message);
+      logger.info('PRODUCTION DEBUG: Falling back to full params...');
+    }
   }
 
   return await _streamText(streamParams);

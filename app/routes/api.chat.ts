@@ -38,11 +38,11 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
     userSubscriptionTier = user.subscriptionTier;
     userSupabaseId = user.supabaseUserId;
     logger.info(`✅ User authenticated - Clerk ID: ${userId}, Supabase ID: ${userSupabaseId}, Tier: ${userSubscriptionTier}`);
-    
+
     // Check AI generation limit before processing
     const { canPerformAction } = await import('~/lib/services/usage-analytics.server');
     const canGenerate = await canPerformAction(userId, 'ai_generation');
-    
+
     if (!canGenerate.allowed) {
       logger.warn(`❌ AI generation limit reached for user ${userId}`);
       return new Response(
@@ -280,7 +280,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
                 order: progressCounter++,
                 message: 'Response Generated',
               } satisfies ProgressAnnotation);
-              
+
               // Track AI generation usage
               logger.info(`📊 Attempting to track usage - Supabase ID: ${userSupabaseId}, Tokens: ${cumulativeUsage.totalTokens}`);
               if (userSupabaseId) {
@@ -299,7 +299,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
               } else {
                 logger.warn(`⚠️ Cannot track usage - userSupabaseId is null for Clerk user ${userId}`);
               }
-              
+
               await new Promise((resolve) => setTimeout(resolve, 0));
 
               // stream.close();
@@ -439,7 +439,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
               if (part.type === 'text-delta') {
                 finalContent += part.textDelta;
               }
-              
+
               if (part.type === 'finish') {
                 finalFinishReason = part.finishReason;
                 finalUsage = part.usage;
@@ -449,10 +449,10 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
             // Handle finish callback manually
             if (finalUsage) {
               try {
-                await safeOnFinish({ 
-                  text: finalContent, 
-                  finishReason: finalFinishReason, 
-                  usage: finalUsage 
+                await safeOnFinish({
+                  text: finalContent,
+                  finishReason: finalFinishReason,
+                  usage: finalUsage
                 });
               } catch (error) {
                 console.error('Error in finish callback:', error);
