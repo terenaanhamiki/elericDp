@@ -400,6 +400,15 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
 
             for await (const part of result.fullStream) {
               streamRecovery.updateActivity();
+              
+              // Debug logging for production
+              if (process.env.NODE_ENV === 'production') {
+                logger.info('PRODUCTION: Processing stream part:', {
+                  type: part.type,
+                  hasTextDelta: !!(part as any).textDelta,
+                  textDeltaLength: (part as any).textDelta?.length || 0
+                });
+              }
 
               if (part.type === 'error') {
                 const error: any = part.error;

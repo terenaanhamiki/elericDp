@@ -394,10 +394,26 @@ export async function streamText(props: {
         })(),
         
         mergeIntoDataStream: (dataStream: any) => {
-          logger.info('PRODUCTION: mergeIntoDataStream called');
+          logger.info('PRODUCTION: mergeIntoDataStream called - writing response directly');
           
-          // Don't do anything here - let the fullStream handle it
-          // The original code processes fullStream in the chat route
+          if (result?.text) {
+            // Write the text directly to the dataStream
+            const encoder = new TextEncoder();
+            const textData = `0:${JSON.stringify({ type: 'text-delta', textDelta: result.text })}\n`;
+            dataStream.write(encoder.encode(textData));
+            
+            // Write finish event
+            const finishData = `0:${JSON.stringify({ 
+              type: 'finish', 
+              finishReason: result.finishReason || 'stop',
+              usage: result.usage 
+            })}\n`;
+            dataStream.write(encoder.encode(finishData));
+            
+            logger.info('PRODUCTION: Successfully wrote text to dataStream');
+          } else {
+            logger.error('PRODUCTION: No text to write to dataStream');
+          }
         }
       };
       
