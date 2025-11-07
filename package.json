@@ -110,7 +110,7 @@
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/addon-web-links": "^0.11.0",
     "@xterm/xterm": "^5.5.0",
-    "ai": "3.3.39",
+    "ai": "4.3.16",
     "bcryptjs": "^3.0.2",
     "buffer": "^6.0.3",
     "chalk": "^5.4.1",
