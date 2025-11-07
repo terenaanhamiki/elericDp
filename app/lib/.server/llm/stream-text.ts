@@ -384,26 +384,27 @@ export async function streamText(props: {
         })(),
         
         mergeIntoDataStream: (dataStream: any) => {
-          // This gets called first - write the text immediately
+          // Write the text in the format that useChat expects
           if (result?.text) {
-            logger.info('PRODUCTION: Writing text to dataStream immediately');
+            logger.info('PRODUCTION: Writing text for useChat compatibility');
             
-            // Write text using the same method as progress updates
             try {
+              // Write as a message completion - this is what useChat expects
+              const messageData = {
+                id: 'msg-' + Date.now(),
+                role: 'assistant',
+                content: result.text
+              };
+              
+              // Write the message data
               dataStream.writeData({
-                type: 'text-delta',
-                textDelta: result.text
+                type: 'message',
+                data: messageData
               });
               
-              dataStream.writeData({
-                type: 'finish',
-                finishReason: result.finishReason || 'stop',
-                usage: result.usage
-              });
-              
-              logger.info('PRODUCTION: Text written successfully');
+              logger.info('PRODUCTION: Message written for useChat');
             } catch (error) {
-              logger.error('PRODUCTION: Error writing text:', error);
+              logger.error('PRODUCTION: Error writing message:', error);
             }
           }
         }
