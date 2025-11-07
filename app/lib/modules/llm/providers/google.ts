@@ -2,7 +2,6 @@ import { BaseProvider } from '~/lib/modules/llm/base-provider';
 import type { ModelInfo } from '~/lib/modules/llm/types';
 import type { IProviderSetting } from '~/types/model';
 import type { LanguageModelV1 } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export default class GoogleProvider extends BaseProvider {
@@ -140,28 +139,93 @@ export default class GoogleProvider extends BaseProvider {
       throw new Error(`Missing API key for ${this.name} provider`);
     }
 
-    console.log('[GoogleProvider] Creating Google AI instance with:', {
-      model,
-      apiKeyLength: apiKey.length,
-      apiKeyPrefix: apiKey.substring(0, 15),
-      nodeEnv: process.env.NODE_ENV,
-    });
+    console.log('[GoogleProvider] Using official Google SDK like your working example');
 
-    try {
-      const google = createGoogleGenerativeAI({
-        apiKey: apiKey.trim(), // Ensure no whitespace
-        // Try without custom baseURL first
-      });
+    // Use the official Google SDK exactly like your working React app
+    const genAI = new GoogleGenerativeAI(apiKey.trim());
 
-      console.log('[GoogleProvider] Google AI instance created successfully');
-      
-      const modelInstance = google(model);
-      console.log('[GoogleProvider] Model instance created for:', model);
-      
-      return modelInstance;
-    } catch (error: any) {
-      console.error('[GoogleProvider] Error creating Google AI instance:', error);
-      throw new Error(`Failed to create Google AI instance: ${error.message}`);
-    }
+    // Create a custom LanguageModelV1 implementation that uses the official Google SDK
+    return {
+      specificationVersion: 'v1',
+      provider: 'google',
+      modelId: model,
+      defaultObjectGenerationMode: 'json',
+
+      async doGenerate(options: any) {
+        const { messages } = options;
+        
+        try {
+          const googleModel = genAI.getGenerativeModel({ model });
+          
+          // Convert messages to a single prompt (like your React example)
+          const prompt = messages.map((msg: any) => 
+            `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+          ).join('\n\n');
+          
+          const result = await googleModel.generateContent(prompt);
+          const response = await result.response;
+          const text = response.text();
+
+          return {
+            text,
+            usage: {
+              promptTokens: 0,
+              completionTokens: 0,
+              totalTokens: 0,
+            },
+            finishReason: 'stop',
+            rawCall: { rawPrompt: prompt, rawSettings: options },
+            rawResponse: { headers: {} },
+            warnings: [],
+          };
+        } catch (error: any) {
+          console.error('[GoogleProvider] Generate error:', error);
+          throw new Error(`Google API Error: ${error.message}`);
+        }
+      },
+
+      async doStream(options: any) {
+        const { messages } = options;
+        
+        try {
+          const googleModel = genAI.getGenerativeModel({ model });
+          
+          // Convert messages to a single prompt
+          const prompt = messages.map((msg: any) => 
+            `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+          ).join('\n\n');
+          
+          const result = await googleModel.generateContentStream(prompt);
+          
+          // Convert Google's stream to AI SDK format
+          const stream = new ReadableStream({
+            async start(controller) {
+              try {
+                for await (const chunk of result.stream) {
+                  const chunkText = chunk.text();
+                  if (chunkText) {
+                    const encoded = new TextEncoder().encode(chunkText);
+                    controller.enqueue(encoded);
+                  }
+                }
+                controller.close();
+              } catch (error) {
+                controller.error(error);
+              }
+            }
+          });
+
+          return {
+            stream,
+            rawCall: { rawPrompt: prompt, rawSettings: options },
+            rawResponse: { headers: {} },
+            warnings: [],
+          };
+        } catch (error: any) {
+          console.error('[GoogleProvider] Stream error:', error);
+          throw new Error(`Google API Error: ${error.message}`);
+        }
+      }
+    } as LanguageModelV1;
   }
 }
