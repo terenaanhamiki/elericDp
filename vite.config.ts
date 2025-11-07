@@ -38,9 +38,8 @@ export default defineConfig((config) => {
       extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
       alias: {
         '~': '/app',
-        'scheduler': 'scheduler',
       },
-      dedupe: ['react', 'react-dom', 'scheduler'],
+      dedupe: ['react', 'react-dom'],
     },
     define: {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),

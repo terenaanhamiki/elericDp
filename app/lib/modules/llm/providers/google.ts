@@ -14,19 +14,19 @@ export default class GoogleProvider extends BaseProvider {
 
   staticModels: ModelInfo[] = [
     {
-    name: 'gemini-1.5-flash',
-    label: 'Gemini 1.5 Flash',
-    provider: 'Google',
-    maxTokenAllowed: 1000000,
-    maxCompletionTokens: 8192,
-  },
-  {
-    name: 'gemini-1.5-pro',
-    label: 'Gemini 1.5 Pro',
-    provider: 'Google',
-    maxTokenAllowed: 2000000,
-    maxCompletionTokens: 8192,
-  },
+      name: 'gemini-2.5-flash',
+      label: 'Gemini 2.5 pro',
+      provider: 'Google',
+      maxTokenAllowed: 2000000,
+      maxCompletionTokens: 8192,
+    },
+    {
+      name: 'gemini-2.5-flash',
+      label: 'Gemini 2.5 Flash',
+      provider: 'Google',
+      maxTokenAllowed: 1000000,
+      maxCompletionTokens: 8192,
+    },
   ];
 
   async getDynamicModels(
@@ -62,10 +62,12 @@ export default class GoogleProvider extends BaseProvider {
       throw new Error('Invalid response format from Google API');
     }
 
-    // Filter out models with very low token limits
+    // Filter out models with very low token limits and experimental models
     const data = res.models.filter((model: any) => {
+      const modelName = model.name.replace('models/', '');
       const hasGoodTokenLimit = (model.outputTokenLimit || 0) > 8000;
-      return hasGoodTokenLimit;
+      const isExperimental = modelName.includes('-exp');
+      return hasGoodTokenLimit && !isExperimental;
     });
 
     return data.map((m: any) => {
